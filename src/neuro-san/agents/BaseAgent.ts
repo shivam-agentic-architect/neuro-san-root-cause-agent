@@ -7,7 +7,9 @@ export abstract class BaseAgent {
   protected logs: string[] = [];
 
   constructor() {
-    this.ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
+    // In AI Studio Build, GEMINI_API_KEY is available as process.env.GEMINI_API_KEY
+    const apiKey = process.env.GEMINI_API_KEY;
+    this.ai = new GoogleGenAI({ apiKey });
   }
 
   protected addLog(message: string) {
@@ -18,11 +20,11 @@ export abstract class BaseAgent {
   }
 
   protected async callGemini(prompt: string, systemInstruction: string, jsonResponse = true) {
-    this.addLog(`Calling Gemini with prompt: ${prompt.substring(0, 100)}...`);
+    this.addLog(`Calling Gemini (Model: gemini-3-flash-preview)`);
     
     try {
       const response = await this.ai.models.generateContent({
-        model: "gemini-3.1-pro-preview",
+        model: "gemini-3-flash-preview",
         contents: prompt,
         config: {
           systemInstruction,
@@ -30,18 +32,13 @@ export abstract class BaseAgent {
         },
       });
 
-      const text = response.text || "";
+      const responseText = response.text || "";
       if (jsonResponse) {
-        try {
-          return JSON.parse(text);
-        } catch (e) {
-          this.addLog(`Failed to parse JSON response: ${text}`);
-          throw new Error("Invalid output format from agent");
-        }
+        return JSON.parse(responseText.trim());
       }
-      return text;
-    } catch (error) {
-      this.addLog(`Error calling Gemini: ${error}`);
+      return responseText;
+    } catch (error: any) {
+      this.addLog(`Critical API Error: ${error.message || error}`);
       throw error;
     }
   }

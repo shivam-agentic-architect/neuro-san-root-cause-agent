@@ -5,30 +5,14 @@ export class SolutionAgent extends BaseAgent {
   public name = "SolutionAgent";
 
   async process(input: { root_cause: string; reasoning: string[] }, context: AgentContext): Promise<AgentOutput> {
-    this.addLog("Generating recommended fixes and preventive steps...");
+    this.addLog("Generating remediation plan...");
     
     const systemInstruction = `
-      You are the SolutionAgent in the Neuro-SAN system.
-      Your task is to:
-      1. Review the diagnosed root cause.
-      2. Recommend an actionable fix.
-      3. Suggest preventive steps to avoid recurrence.
-      
-      Return a JSON object:
-      {
-        "recommended_fix": string,
-        "preventive_actions": string[]
-      }
+      You are the SolutionAgent. Recommend a fix and preventive steps.
+      Format: JSON { "recommended_fix": string, "preventive_actions": string[] }
     `;
 
-    const prompt = `
-      Root Cause:
-      ${input.root_cause}
-      
-      Reasoning:
-      ${input.reasoning.join("\n")}
-    `;
-
+    const prompt = `Root Cause: ${input.root_cause}\nReasoning: ${input.reasoning.join("\n")}`;
     const data = await this.callGemini(prompt, systemInstruction);
     
     return {

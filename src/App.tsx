@@ -5,22 +5,9 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Activity, 
-  Terminal, 
-  AlertCircle, 
-  CheckCircle2, 
-  Search, 
-  Cpu, 
-  Lightbulb, 
-  Zap, 
-  ChevronRight,
-  Database,
-  BarChart3,
-  Loader2
-} from 'lucide-react';
-import { NeuroSANOrchestrator } from './neuro-san/workflow/Orchestrator';
+import { Activity, Terminal, AlertCircle, CheckCircle2, Search, Cpu, Lightbulb, Zap, ChevronRight, Database, BarChart3, Loader2 } from 'lucide-react';
 import { RootCauseResponse, WorkflowState } from './neuro-san/types';
+import { NeuroSANOrchestrator } from './neuro-san/workflow/Orchestrator';
 
 export default function App() {
   const [logsInput, setLogsInput] = useState("Database timeout error at 10:32 PM. Connection pool exhausted. Multiple retry failures.");
@@ -31,7 +18,6 @@ export default function App() {
   });
   const [agentLogs, setAgentLogs] = useState<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
-
   const orchestrator = useRef(new NeuroSANOrchestrator());
 
   useEffect(() => {
@@ -56,55 +42,28 @@ export default function App() {
         addAgentLog("[WARNING] Invalid metrics JSON. Proceeding without metrics.");
       }
 
-      await orchestrator.current.runWorkflow(logsInput, metrics, (step, data) => {
-        switch (step) {
-          case 'analyzing':
-            setWorkflowState(prev => ({ ...prev, status: 'analyzing' }));
-            addAgentLog("LogAnalyzerAgent: Extracting symptoms...");
-            break;
-          case 'analyzing_done':
-            setWorkflowState(prev => ({ ...prev, extractedErrors: data.extracted_errors, anomalies: data.anomalies }));
-            addAgentLog("LogAnalyzerAgent: Extraction complete.");
-            break;
-          case 'detecting':
-            setWorkflowState(prev => ({ ...prev, status: 'detecting' }));
-            addAgentLog("PatternDetectionAgent: Correlating events...");
-            break;
-          case 'detecting_done':
-            setWorkflowState(prev => ({ ...prev, patterns: data.patterns }));
-            addAgentLog("PatternDetectionAgent: Patterns identified.");
-            break;
-          case 'diagnosing':
-            setWorkflowState(prev => ({ ...prev, status: 'diagnosing' }));
-            addAgentLog("RootCauseAgent: Determining root cause...");
-            break;
-          case 'diagnosing_done':
-            setWorkflowState(prev => ({ 
-              ...prev, 
-              rootCause: data.root_cause, 
-              confidence: data.confidence, 
-              reasoning: data.reasoning 
-            }));
-            addAgentLog("RootCauseAgent: Diagnosis complete.");
-            break;
-          case 'prescribing':
-            setWorkflowState(prev => ({ ...prev, status: 'prescribing' }));
-            addAgentLog("SolutionAgent: Generating recommendations...");
-            break;
-          case 'prescribing_done':
-            setWorkflowState(prev => ({ 
-              ...prev, 
-              recommendedFix: data.recommended_fix,
-              status: 'completed'
-            }));
-            addAgentLog("SolutionAgent: Recommendations ready.");
-            addAgentLog("[SUCCESS] Workflow completed successfully.");
-            break;
-        }
+      addAgentLog("Initializing Neuro-SAN Local Orchestrator...");
+      
+      const data = await orchestrator.current.runWorkflow(logsInput, metrics, (step, stepData) => {
+        setWorkflowState(prev => ({ ...prev, status: step as any }));
+        addAgentLog(`[SYSTEM] Step progress: ${step}`);
       });
-    } catch (error) {
-      setWorkflowState(prev => ({ ...prev, status: 'failed', error: String(error) }));
-      addAgentLog(`[ERROR] Workflow failed: ${error}`);
+      
+      setWorkflowState(prev => ({ 
+        ...prev, 
+        rootCause: data.root_cause, 
+        confidence: data.confidence, 
+        reasoning: data.reasoning,
+        recommendedFix: data.recommended_fix,
+        status: 'completed'
+      }));
+
+      addAgentLog("Neuro-SAN Agent Mesh: Diagnosis complete.");
+      addAgentLog("[SUCCESS] Workflow completed successfully.");
+
+    } catch (error: any) {
+      setWorkflowState(prev => ({ ...prev, status: 'failed', error: String(error.message || error) }));
+      addAgentLog(`[ERROR] Workflow failed: ${error.message || error}`);
     }
   };
 
@@ -390,9 +349,9 @@ export default function App() {
       <footer className="max-w-6xl mx-auto mt-12 pt-6 border-t border-slate-800 text-[10px] text-slate-600 uppercase tracking-[0.3em] flex justify-between items-center">
         <div>Neuro-SAN Framework • Production Environment</div>
         <div className="flex gap-6">
-          <span>Agent Mesh: Secure</span>
-          <span>Latency: 240ms</span>
-          <span>Model: Gemini 3.1 Pro</span>
+          <span>Agent Mesh: Synchronized</span>
+          <span>Latency: Optimized</span>
+          <span>Model: Gemini 3.0 Flash</span>
         </div>
       </footer>
     </div>

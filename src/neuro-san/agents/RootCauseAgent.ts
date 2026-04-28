@@ -5,34 +5,14 @@ export class RootCauseAgent extends BaseAgent {
   public name = "RootCauseAgent";
 
   async process(input: { patterns: string[]; correlations: string[]; logs: string }, context: AgentContext): Promise<AgentOutput> {
-    this.addLog("Diagnosing root cause...");
+    this.addLog("Synthesizing final diagnosis...");
     
     const systemInstruction = `
-      You are the RootCauseAgent in the Neuro-SAN system.
-      Your task is to:
-      1. Review the detected patterns and correlations.
-      2. Predict the most probable root cause of the system failure.
-      3. Provide a clear reasoning chain (step-by-step logic).
-      
-      Return a JSON object:
-      {
-        "root_cause": string,
-        "confidence": number (0 to 1),
-        "reasoning": string[]
-      }
+      You are the RootCauseAgent. Synthesize root cause and reasoning.
+      Format: JSON { "root_cause": string, "confidence": number, "reasoning": string[] }
     `;
 
-    const prompt = `
-      Original Logs:
-      ${input.logs}
-
-      Patterns Found:
-      ${input.patterns.join("\n")}
-      
-      Correlations Found:
-      ${input.correlations.join("\n")}
-    `;
-
+    const prompt = `Patterns: ${input.patterns.join(", ")}\nCorrelations: ${input.correlations.join(", ")}\nContext: ${input.logs}`;
     const data = await this.callGemini(prompt, systemInstruction);
     
     return {

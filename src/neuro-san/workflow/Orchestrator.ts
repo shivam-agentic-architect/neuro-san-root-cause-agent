@@ -18,46 +18,43 @@ export class NeuroSANOrchestrator {
   }
 
   async runWorkflow(logs: string, metrics?: any, onProgress?: (step: string, data: any) => void): Promise<RootCauseResponse> {
-    const workflowId = Math.random().toString(36).substring(7);
+    const workflowId = "WS-" + Math.random().toString(36).substring(7);
     const history: AgentOutput[] = [];
     const context: AgentContext = { workflowId, history };
 
-    // Step 1: Log Analysis
-    onProgress?.('analyzing', null);
-    const analyzerOutput = await this.logAnalyzer.process({ logs, metrics }, context);
-    history.push(analyzerOutput);
-    onProgress?.('analyzing_done', analyzerOutput.data);
+    try {
+      // Step 1: Log Analysis
+      onProgress?.('analyzing', null);
+      const analyzerOutput = await this.logAnalyzer.process({ logs, metrics }, context);
+      history.push(analyzerOutput);
 
-    // Step 2: Pattern Detection
-    onProgress?.('detecting', null);
-    const patternOutput = await this.patternDetector.process(analyzerOutput.data, context);
-    history.push(patternOutput);
-    onProgress?.('detecting_done', patternOutput.data);
+      // Step 2: Pattern Detection
+      onProgress?.('detecting', analyzerOutput.data);
+      const patternOutput = await this.patternDetector.process(analyzerOutput.data, context);
+      history.push(patternOutput);
 
-    // Step 3: Root Cause Analysis
-    onProgress?.('diagnosing', null);
-    const rootCauseOutput = await this.rootCauseAgent.process({ 
-      ...patternOutput.data, 
-      logs 
-    }, context);
-    history.push(rootCauseOutput);
-    onProgress?.('diagnosing_done', rootCauseOutput.data);
+      // Step 3: Root Cause Analysis
+      onProgress?.('diagnosing', patternOutput.data);
+      const rootCauseOutput = await this.rootCauseAgent.process({ 
+        ...patternOutput.data, 
+        logs 
+      }, context);
+      history.push(rootCauseOutput);
 
-    // Step 4: Solution Generation
-    onProgress?.('prescribing', null);
-    const solutionOutput = await this.solutionAgent.process(rootCauseOutput.data, context);
-    history.push(solutionOutput);
-    onProgress?.('prescribing_done', solutionOutput.data);
+      // Step 4: Solution Generation
+      onProgress?.('prescribing', rootCauseOutput.data);
+      const solutionOutput = await this.solutionAgent.process(rootCauseOutput.data, context);
+      history.push(solutionOutput);
 
-    // Final Aggregate Result
-    const finalResult: RootCauseResponse = {
-      root_cause: rootCauseOutput.data.root_cause,
-      confidence: rootCauseOutput.data.confidence,
-      reasoning: rootCauseOutput.data.reasoning,
-      recommended_fix: solutionOutput.data.recommended_fix
-    };
-
-    onProgress?.('completed', finalResult);
-    return finalResult;
+      return {
+        root_cause: rootCauseOutput.data.root_cause,
+        confidence: rootCauseOutput.data.confidence,
+        reasoning: rootCauseOutput.data.reasoning,
+        recommended_fix: solutionOutput.data.recommended_fix
+      };
+    } catch (error) {
+      console.error("[ORCHESTRATOR WORKFLOW ERROR]", error);
+      throw error;
+    }
   }
 }

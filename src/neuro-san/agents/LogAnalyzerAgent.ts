@@ -5,31 +5,14 @@ export class LogAnalyzerAgent extends BaseAgent {
   public name = "LogAnalyzerAgent";
 
   async process(input: { logs: string; metrics?: any }, context: AgentContext): Promise<AgentOutput> {
-    this.addLog("Starting log analysis and normalization...");
+    this.addLog("Processing log ingestion...");
     
     const systemInstruction = `
-      You are the LogAnalyzerAgent in the Neuro-SAN Root Cause Analysis system.
-      Your task is to:
-      1. Extract key errors and exceptions from the provided logs.
-      2. Identify anomalies in timing or frequency.
-      3. Normalize the data into a clean structure for downstream agents.
-      
-      Return a JSON object:
-      {
-        "extracted_errors": string[],
-        "anomalies": string[],
-        "summary": string
-      }
+      You are the LogAnalyzerAgent. Extract key errors, anomalous metrics, and symptoms.
+      Format: JSON { "extracted_errors": string[], "anomalies": string[], "summary": string }
     `;
 
-    const prompt = `
-      Logs:
-      ${input.logs}
-      
-      Metrics:
-      ${JSON.stringify(input.metrics || {})}
-    `;
-
+    const prompt = `Logs: ${input.logs}\nMetrics: ${JSON.stringify(input.metrics || {})}`;
     const data = await this.callGemini(prompt, systemInstruction);
     
     return {
