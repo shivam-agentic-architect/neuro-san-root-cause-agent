@@ -1,0 +1,6 @@
+{
+  "name": "Neuro-SAN Studio: Root Cause Analysis",
+  "description": "Multi-agent system for automated root cause analysis of system logs and errors using the Neuro-SAN agent framework.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
