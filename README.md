@@ -1,20 +1,43 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Neuro-SAN Studio: AI Root Cause Analysis
 
-# Run and deploy your AI Studio app
+Neuro-SAN Studio is a multi-agent diagnostic system designed to automate root cause analysis of complex system failures. By processing raw logs and metrics through a specialized agent mesh, it identifies patterns, predicts root causes, and recommends actionable resolutions.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/a42bcd53-b89f-44e5-b206-d56626bde5be
+- **Multi-Agent Orchestration**: Specialized agents for log analysis, pattern detection, and solution generation.
+- **AI-Powered Diagnostics**: Utilizes Gemini 1.5 Flash for high-confidence reasoning.
+- **Interactive Traceability**: View the internal reasoning chain and logs of each agent in the mesh.
+- **Enterprise Ready**: Designed for observability and fast MTTR (Mean Time to Resolution).
 
-## Run Locally
+## Getting Started
 
-**Prerequisites:**  Node.js
+### Prerequisites
 
+- Node.js (v18+)
+- npm or yarn
+- Google Gemini API Key (set as `GEMINI_API_KEY` environment variable)
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Installation
+
+```bash
+npm install
+```
+
+### Running Locally
+
+```bash
+npm run dev
+```
+
+The application will be available at `http://localhost:3000`.
+
+## Architecture
+
+1. **LogAnalyzerAgent**: Ingests raw data and extracts critical symptoms.
+2. **PatternDetectionAgent**: Correlates events across time and services.
+3. **RootCausePredictorAgent**: Predicts the primary failure point with a confidence score.
+4. **SolutionGeneratorAgent**: Prescribes fixes and preventive measures.
+
+## License
+
+MIT
